@@ -1,0 +1,54 @@
+/* PDF-specific styles */
+@media print {
+    @page {
+      size: A4;
+      margin: 20mm;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    
+    #markdown-preview {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm;
+      margin: 0;
+      background: white;
+      box-shadow: none;
+    }
+  }
+  
+  /* Preview styles */
+  .prose {
+    font-family: 'Times New Roman', Times, serif;
+    line-height: 1.6;
+    color: #333;
+  }
+  
+  .prose h1 {
+    font-size: 24pt;
+    margin-bottom: 1em;
+  }
+  
+  .prose h2 {
+    font-size: 18pt;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+  }
+  
+  .prose p {
+    font-size: 12pt;
+    margin-bottom: 1em;
+  }
+  
+  .prose ul, .prose ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+  }
+  
+  .prose li {
+    font-size: 12pt;
+    margin-bottom: 0.5em;
+  }
