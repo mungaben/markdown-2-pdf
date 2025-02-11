@@ -59,25 +59,63 @@ export const generateWord = async (content: string): Promise<void> => {
             spacing: { before: 100, after: 100 },
           });
 
-        case "table":
-          // Handle tables (if present in Markdown)
-          return new Table({
-            rows: item.rows.map((row: any[]) =>
-              new TableRow({
-                children: row.map(
-                  (cell: any) =>
+          case "table":
+            // Handle tables (if present in Markdown)
+            return new Table({
+              rows: item.rows.map((row: any[]) =>
+                new TableRow({
+                  children: row.map((cell: any) =>
                     new TableCell({
-                      children: [new Paragraph(getPlainText(cell))],
+                      children: processTableCell(cell), // Process nested content in cells
                       borders: {
                         top: { style: BorderStyle.SINGLE, size: 4, color: "E1E4E8" },
                         bottom: { style: BorderStyle.SINGLE, size: 4, color: "E1E4E8" },
                         left: { style: BorderStyle.NONE },
                         right: { style: BorderStyle.NONE },
                       },
+                      margins: {
+                        top: 100,
+                        bottom: 100,
+                        left: 100,
+                        right: 100,
+                      },
                     })
-                ),
-              })
-            ),
+                  ),
+                })
+              ),
+            });
+        case "blockquote":
+          // Handle blockquotes
+          return new Paragraph({
+            children: [new TextRun({ text: getPlainText(item.text), italics: true })],
+            indent: { left: 720 }, // Indentation for blockquotes
+            spacing: { before: 100, after: 100 },
+          });
+
+        case "image":
+          // Handle images
+          return new Paragraph({
+            children: [
+              new TextRun({
+                text: `Image: ${item.text} (${item.href})`, // Include image description and URL
+                bold: true,
+                color: "0000FF", // Blue color for links
+              }),
+            ],
+            spacing: { before: 100, after: 100 },
+          });
+
+        case "link":
+          // Handle hyperlinks
+          return new Paragraph({
+            children: [
+              new TextRun({
+                text: `${item.text} (${item.href})`, // Include link text and URL
+                color: "0000FF", // Blue color for links
+                underline: {},
+              }),
+            ],
+            spacing: { before: 100, after: 100 },
           });
 
         default:
@@ -87,6 +125,52 @@ export const generateWord = async (content: string): Promise<void> => {
       }
     });
   };
+
+  // Recursive function to process table cells
+  const processTableCell = (cell: any): any[] => {
+    const cellContent = [];
+
+    // Add paragraphs to the cell
+    if (cell.tokens) {
+      cellContent.push(
+        new Paragraph({
+          children: [new TextRun(getPlainText(cell.text))],
+        })
+      );
+    }
+
+    // Handle nested tables (if any)
+    if (cell.table) {
+      cellContent.push(
+        new Table({
+          rows: cell.table.rows.map((row: any[]) =>
+            new TableRow({
+              children: row.map((nestedCell: any) =>
+                new TableCell({
+                  children: processTableCell(nestedCell), // Recursively process nested cells
+                  borders: {
+                    top: { style: BorderStyle.SINGLE, size: 4, color: "E1E4E8" },
+                    bottom: { style: BorderStyle.SINGLE, size: 4, color: "E1E4E8" },
+                    left: { style: BorderStyle.NONE },
+                    right: { style: BorderStyle.NONE },
+                  },
+                  margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100,
+                  },
+                })
+              ),
+            })
+          ),
+        })
+      );
+    }
+
+    return cellContent;
+  };
+
 
   // Create the Word document
   const doc = new Document({
@@ -124,7 +208,6 @@ export const generateWord = async (content: string): Promise<void> => {
   const blob = await Packer.toBlob(doc);
   const fileName = getDefaultFileName(content, "docx");
   const url = URL.createObjectURL(blob);
-
   const link = document.createElement("a");
   link.href = url;
   link.download = fileName;
@@ -132,7 +215,6 @@ export const generateWord = async (content: string): Promise<void> => {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-
   toast({ title: "Success", description: `Word document "${fileName}" generated successfully!` });
   playSound("/sounds/success.mp3");
 };

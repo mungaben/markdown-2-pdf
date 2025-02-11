@@ -4,10 +4,13 @@ import { exportToHTML } from "@/components/htmlUtils";
 import { exportToMarkdown } from "@/components/markdownUtils";
 import { MarkdownEditor } from "@/components/pdf/markdownEditor";
 import PDFPreview from "@/components/pdf/pdfPreview";
-import { generatePDF } from "@/components/pdfUtils";
+import { generateMultiPagePDF } from "@/components/pdfUtils";
+
+
 import { downloadPlainText } from "@/components/plainTextUtils";
 import { generatePPTX } from "@/components/pptxUtils";
 import { generateWord } from "@/components/wordUtils";
+
 import { useState } from "react";
 
 const DEFAULT_MARKDOWN = `# Enhanced Document Generator Test Suite
@@ -115,7 +118,7 @@ export default function Home() {
 
     switch (format) {
       case "pdf":
-        await generatePDF(element, markdown);
+        await generateMultiPagePDF(element, markdown);
         break;
       case "pptx":
         await generatePPTX(markdown);
